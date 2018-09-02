@@ -58,15 +58,8 @@ def get_url(item_name, code_df):
     return url
 
 
-def is_desire_volume(volume):
-    if volume > 1000000:
-        return True
-
-    return False
-
-
-def is_desire_volume_reduction(volumn):
-    if volumn > 11:
+def is_desire_volume_reduction(volume):
+    if volume > 11:
         return True
 
     return False
@@ -86,21 +79,31 @@ def is_bear_day(start_price, end_price):
     return False
 
 
+def calculate_eight_line(end_price_list):
+    total = 0
+    for price in end_price_list:
+        total += price
+
+    return total / end_price_list.__len__()
+
+
 def check_data_frame(df):
     volume_list = list()
     start_price_list = list()
     end_price_list = list()
 
     try:
-        for index in range(1, 6):
+        for index in range(0, 8):
             volume_list.append(df.iloc[index]['거래량'])
             start_price_list.append(df.iloc[index]['시가'])
             end_price_list.append(df.iloc[index]['종가'])
 
+        eight_price = calculate_eight_line(end_price_list)
+
         today_volume = df.iloc[0]['거래량']
-        for index in range(1, 6):
+        for index in range(1, 8):
             value = volume_list[index] / today_volume
-            if is_desire_volume(volume_list[index]) and is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]):
+            if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]) and today_volume >= eight_price:
                 return True
 
     except IndexError:
