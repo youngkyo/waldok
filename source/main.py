@@ -1,13 +1,9 @@
 import pandas as pd
-import telegram
-import configparser
-from bs4 import BeautifulSoup
 import requests
+import telegram
+from bs4 import BeautifulSoup
 
-config = configparser.ConfigParser()
-config.read('/home/ec2-user/stock/config/waldokconfig')
-
-my_token = config['DEFAULT']['TELE_TOKEN']
+my_token = '643538405:AAGm9ZRYHtSEuLwJMazk7_bTnjlvC9Jx-4w'
 bot = telegram.Bot(token=my_token)
 
 
@@ -59,7 +55,7 @@ def get_url(item_name, code_df):
 
 
 def is_desire_volume_reduction(volume):
-    if volume > 11:
+    if volume > 15:
         return True
 
     return False
@@ -101,7 +97,7 @@ def check_data_frame(df):
         eight_price = calculate_eight_line(end_price_list)
 
         today_volume = df.iloc[0]['거래량']
-        for index in range(1, 8):
+        for index in range(1, 4):
             value = volume_list[index] / today_volume
             if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]) and today_volume >= eight_price:
                 return True
