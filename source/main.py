@@ -7,7 +7,7 @@ my_token = '643538405:AAGm9ZRYHtSEuLwJMazk7_bTnjlvC9Jx-4w'
 bot = telegram.Bot(token=my_token)
 
 
-def getStockList(kospi_url):
+def get_stock_list(kospi_url):
     stock_list = []
 
     for i in range(1, 2000):
@@ -40,8 +40,8 @@ def all_stock_name_by_df():
     kospi_url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok=0&&page='
     kosdaq_url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok=1&page='
 
-    final_list = getStockList(kospi_url)
-    final_list.extend(getStockList(kosdaq_url))
+    final_list = get_stock_list(kospi_url)
+    final_list.extend(get_stock_list(kosdaq_url))
 
     return pd.DataFrame(final_list, columns=['code', 'name', 'volume'])
 
@@ -83,10 +83,12 @@ def calculate_eight_line(end_price_list):
     return total / end_price_list.__len__()
 
 
-def check_data_frame(df):
+def check_is_condition_stock(df):
     volume_list = list()
     start_price_list = list()
     end_price_list = list()
+
+    today = 0
 
     try:
         for index in range(0, 8):
@@ -97,10 +99,18 @@ def check_data_frame(df):
         eight_price = calculate_eight_line(end_price_list)
 
         today_volume = df.iloc[0]['거래량']
+
+        if not is_bear_day(start_price_list[today], end_price_list[today]):
+            return False
+
         for index in range(1, 4):
             value = volume_list[index] / today_volume
-            if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]) and today_volume >= eight_price:
+
+            if is_desire_volume_reduction(value) and today_volume >= eight_price:
                 return True
+
+            # if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index],
+            #                                                      end_price_list[index]) and today_volume >= eight_price:
 
     except IndexError:
         return False
@@ -119,8 +129,10 @@ def get_head_subject(stock_df):
             df = df.append(pd.read_html(pg_url, header=0)[0], ignore_index=True)
 
         df = df.dropna()
-        if check_data_frame(df):
-            stock_list.append(row['code'] + " " + row['name'])
+        if check_is_condition_stock(df):
+            new_list = specific_news_search(row['name'])
+            stock_list.append("<b>" + row['code'] + " " + row['name'] + "</b>")
+            stock_list.append('\n'.join(new_list))
 
     return stock_list
 
@@ -128,9 +140,36 @@ def get_head_subject(stock_df):
 def main():
     stock_df = all_stock_name_by_df()
     value = get_head_subject(stock_df)
-    value_list = '\n'.join(value)
+    value_list = '\n\n'.join(value)
     if value_list != "":
-        bot.send_message(chat_id='@waldok', text=value_list, timeout=10)
+        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.HTML)
+        # print(value_list)
+
+
+def specific_news_search(name):
+    news_list = []
+    url = 'https://search.naver.com/search.naver'
+    for page in range(1, 2):
+        params = {
+            'query': name + " 특징주",
+            'where': 'news',
+            'start': (page - 1) * 10 + 1,
+        }
+
+        response = requests.get(url, params=params)
+        html = response.text
+
+        # 뷰티풀소프의 인자값 지정
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # 쪼개기
+        news_title_list = soup.select('._sp_each_title')
+        other_info_list = soup.select('.txt_inline')
+
+        for index in range(0, 2):
+            news_list.append(news_title_list[index].text + ' ' + other_info_list[index].text)
+
+    return news_list
 
 
 if __name__ == "__main__":
