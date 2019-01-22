@@ -142,8 +142,6 @@ def main():
     value = get_head_subject(stock_df)
     value_list = '\n\n'.join(value)
     if value_list != "":
-        value_list = value_list.replace("<b>", "*")
-        value_list = value_list.replace("</b>", "*")
         bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
         # print(value_list)
 
