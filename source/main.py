@@ -142,7 +142,9 @@ def main():
     value = get_head_subject(stock_df)
     value_list = '\n\n'.join(value)
     if value_list != "":
-        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.HTML)
+        value_list = value_list.replace("<b>", "*")
+        value_list = value_list.replace("</b>", "*")
+        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
         # print(value_list)
 
 
@@ -166,8 +168,11 @@ def specific_news_search(name):
         news_title_list = soup.select('._sp_each_title')
         other_info_list = soup.select('.txt_inline')
 
-        for index in range(0, 2):
-            news_list.append(news_title_list[index].text + ' ' + other_info_list[index].text)
+        try:
+            for index in range(0, 4):
+                news_list.append(news_title_list[index].text + ' ' + other_info_list[index].text)
+        except IndexError:
+            continue
 
     return news_list
 
