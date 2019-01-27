@@ -131,7 +131,7 @@ def get_head_subject(stock_df):
         df = df.dropna()
         if check_is_condition_stock(df):
             new_list = specific_news_search(row['name'])
-            stock_list.append("<b>" + row['code'] + " " + row['name'] + "</b>")
+            stock_list.append("*" + row['code'] + " " + row['name'] + "*")
             stock_list.append('\n'.join(new_list))
 
     return stock_list
