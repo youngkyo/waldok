@@ -171,9 +171,6 @@ def get_head_subject(stock_df):
 
         df = df.dropna()
 
-        if row['name'] == '케이씨피드':
-            print('find')
-
         if check_is_fit(df) and is_not_eft(row['name']):
             new_list = specific_news_search(row['name'])
             stock_list.append("*" + row['code'] + " " + row['name'] + "*")
