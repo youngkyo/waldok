@@ -55,7 +55,7 @@ def get_url(item_name, code_df):
 
 
 def is_desire_volume_reduction(volume):
-    if volume > 15:
+    if volume < 11:
         return True
 
     return False
@@ -83,34 +83,35 @@ def calculate_eight_line(end_price_list):
     return total / end_price_list.__len__()
 
 
-def check_is_condition_stock(df):
+def check_is_fit(df):
     volume_list = list()
-    start_price_list = list()
     end_price_list = list()
+    start_price_list = list()
 
     today = 0
+    yesterday = today + 1
 
     try:
-        for index in range(0, 8):
+        for index in range(today, 5):
             volume_list.append(df.iloc[index]['거래량'])
             start_price_list.append(df.iloc[index]['시가'])
             end_price_list.append(df.iloc[index]['종가'])
 
-        eight_price = calculate_eight_line(end_price_list)
+        # eight_price = calculate_eight_line(end_price_list)
 
-        today_volume = df.iloc[0]['거래량']
+        today_volume = df.iloc[today]['거래량']
 
+        # 오늘이 음봉인지 확인.
         if not is_bear_day(start_price_list[today], end_price_list[today]):
             return False
 
-        for index in range(1, 4):
-            value = volume_list[index] / today_volume
+        # 오늘을 제외한 최근 4일간의 거래량이 15% 이하인지 체크.
+        # 해당 거래량이 터진날이 양봉인지 체크 필요.
+        for index in range(yesterday, 5):
+            value = (today_volume / volume_list[index]) * 100
 
-            if is_desire_volume_reduction(value) and today_volume >= eight_price:
+            if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]):
                 return True
-
-            # if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index],
-            #                                                      end_price_list[index]) and today_volume >= eight_price:
 
     except IndexError:
         return False
@@ -118,32 +119,14 @@ def check_is_condition_stock(df):
     return False
 
 
-def get_head_subject(stock_df):
-    stock_list = []
+def is_not_eft(name):
+    exclude_title = ["KBSTAR", "KOSEF", "KINDEX", "KODEX", "HANARO", "TIGER", "ARIRANG", "인버스", "레버리지"]
 
-    for index, row in stock_df.iterrows():
-        df = pd.DataFrame()
-        url = get_url(row['name'], stock_df)
-        for page in range(1, 2):
-            pg_url = '{url}&page={page}'.format(url=url, page=page)
-            df = df.append(pd.read_html(pg_url, header=0)[0], ignore_index=True)
+    for title in exclude_title:
+        if title in name:
+            return False
 
-        df = df.dropna()
-        if check_is_condition_stock(df):
-            new_list = specific_news_search(row['name'])
-            stock_list.append("*" + row['code'] + " " + row['name'] + "*")
-            stock_list.append('\n'.join(new_list))
-
-    return stock_list
-
-
-def main():
-    stock_df = all_stock_name_by_df()
-    value = get_head_subject(stock_df)
-    value_list = '\n\n'.join(value)
-    if value_list != "":
-        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
-        # print(value_list)
+    return True
 
 
 def specific_news_search(name):
@@ -169,10 +152,43 @@ def specific_news_search(name):
         try:
             for index in range(0, 4):
                 news_list.append(news_title_list[index].text + ' ' + other_info_list[index].text)
+
         except IndexError:
             continue
 
     return news_list
+
+
+def get_head_subject(stock_df):
+    stock_list = []
+
+    for index, row in stock_df.iterrows():
+        df = pd.DataFrame()
+        url = get_url(row['name'], stock_df)
+        for page in range(1, 2):
+            pg_url = '{url}&page={page}'.format(url=url, page=page)
+            df = df.append(pd.read_html(pg_url, header=0)[0], ignore_index=True)
+
+        df = df.dropna()
+
+        if row['name'] == '케이씨피드':
+            print('find')
+
+        if check_is_fit(df) and is_not_eft(row['name']):
+            new_list = specific_news_search(row['name'])
+            stock_list.append("*" + row['code'] + " " + row['name'] + "*")
+            stock_list.append('\n'.join(new_list))
+
+    return stock_list
+
+
+def main():
+    stock_df = all_stock_name_by_df()
+    value = get_head_subject(stock_df)
+    value_list = '\n\n'.join(value)
+    if value_list != "":
+        # bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+        print(value_list)
 
 
 if __name__ == "__main__":
