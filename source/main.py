@@ -83,6 +83,12 @@ def calculate_eight_line(end_price_list):
     return total / end_price_list.__len__()
 
 
+def is_bigger_than(last_low_price, today_low_price):
+    if last_low_price > today_low_price:
+        return False
+    return True
+
+
 def check_is_fit(df):
     volume_list = list()
     end_price_list = list()
@@ -110,7 +116,8 @@ def check_is_fit(df):
         for index in range(yesterday, 5):
             value = (today_volume / volume_list[index]) * 100
 
-            if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]):
+            if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]) \
+                    and is_bigger_than(start_price_list[index], end_price_list[today]):
                 return True
 
     except IndexError:
@@ -184,8 +191,8 @@ def main():
     value = get_head_subject(stock_df)
     value_list = '\n\n'.join(value)
     if value_list != "":
-        # bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
-        print(value_list)
+        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+        # print(value_list)
 
 
 if __name__ == "__main__":
