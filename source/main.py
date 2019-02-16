@@ -157,7 +157,7 @@ def specific_news_search(name):
         other_info_list = soup.select('.txt_inline')
 
         try:
-            for index in range(0, 4):
+            for index in range(0, 2):
                 news_list.append(news_title_list[index].text + ' ' + other_info_list[index].text)
 
         except IndexError:
