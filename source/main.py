@@ -55,7 +55,7 @@ def get_url(item_name, code_df):
 
 
 def is_desire_volume_reduction(volume):
-    if volume < 11:
+    if volume < 15:
         return True
 
     return False
