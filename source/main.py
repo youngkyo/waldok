@@ -1,3 +1,4 @@
+# coding=utf-8
 import pandas as pd
 import requests
 import telegram
@@ -49,6 +50,7 @@ def all_stock_name_by_df():
 # 종목 이름을 입력하면 종목에 해당하는 코드를 불러와 # 네이버 금융(http://finance.naver.com)에 넣어줌
 def get_url(item_name, code_df):
     code = code_df.query("name=='{}'".format(item_name))['code'].to_string(index=False)
+    code = code.strip()
     url = 'http://finance.naver.com/item/sise_day.nhn?code={code}'.format(code=code)
 
     return url
@@ -183,16 +185,18 @@ def get_head_subject(stock_df):
             stock_list.append("*" + row['code'] + " " + row['name'] + "*")
             stock_list.append('\n'.join(new_list))
 
+        if len(stock_list) > 10:
+            # print(len(stock_list))
+            values = '\n\n'.join(stock_list)
+            bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+            stock_list = []
+
     return stock_list
 
 
 def main():
     stock_df = all_stock_name_by_df()
-    value = get_head_subject(stock_df)
-    value_list = '\n\n'.join(value)
-    if value_list != "":
-        bot.send_message(chat_id='@waldok', text=value_list, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
-        # print(value_list)
+    get_head_subject(stock_df)
 
 
 if __name__ == "__main__":
