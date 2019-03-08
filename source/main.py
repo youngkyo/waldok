@@ -185,11 +185,15 @@ def get_head_subject(stock_df):
             stock_list.append("*" + row['code'] + " " + row['name'] + "*")
             stock_list.append('\n'.join(new_list))
 
-        if len(stock_list) > 10:
+        if len(stock_list) > 9:
             # print(len(stock_list))
             values = '\n\n'.join(stock_list)
+            # print(values)
             bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
             stock_list = []
+
+    if len(stock_list) > 0:
+        bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
 
     return stock_list
 
