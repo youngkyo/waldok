@@ -108,6 +108,8 @@ def check_is_fit(df):
         # eight_price = calculate_eight_line(end_price_list)
 
         today_volume = df.iloc[today]['거래량']
+        before_3day_volume = df.iloc[3]['거래량']
+        before_4day_volume = df.iloc[4]['거래량']
 
         # 오늘이 음봉인지 확인.
         if not is_bear_day(start_price_list[today], end_price_list[today]):
@@ -115,12 +117,27 @@ def check_is_fit(df):
 
         # 오늘을 제외한 최근 4일간의 거래량이 15% 이하인지 체크.
         # 해당 거래량이 터진날이 양봉인지 체크 필요.
-        for index in range(yesterday, 5):
+        for index in range(yesterday, 4):
             value = (today_volume / volume_list[index]) * 100
 
             if is_desire_volume_reduction(value) and is_bull_day(start_price_list[index], end_price_list[index]) \
-                    and is_bigger_than(start_price_list[index], end_price_list[today]):
+                    and is_bigger_than(start_price_list[index], end_price_list[today]) and volume_list[index] > 5000000:
                 return True
+
+        # three
+        if start_price_list[1] > end_price_list[1] \
+                and start_price_list[2] > end_price_list[2] \
+                and start_price_list[3] < end_price_list[3] \
+                and before_3day_volume >= 1000000:
+            return True
+
+        # four
+        if start_price_list[1] > end_price_list[1] \
+                and start_price_list[2] > end_price_list[2] \
+                and start_price_list[3] > end_price_list[3] \
+                and start_price_list[4] < end_price_list[4] \
+                and before_4day_volume >= 1000000:
+            return True
 
     except IndexError:
         return False
@@ -189,11 +206,12 @@ def get_head_subject(stock_df):
             # print(len(stock_list))
             values = '\n\n'.join(stock_list)
             # print(values)
-            bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+            # bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
             stock_list = []
 
     if len(stock_list) > 0:
-        bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+        # bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+        print(stock_list)
 
     return stock_list
 
