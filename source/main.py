@@ -212,7 +212,7 @@ def get_head_subject(stock_df):
             values = '\n\n'.join(stock_list)
             # print(values)
             bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
-            # stock_list = []
+            stock_list = []
 
     if len(stock_list) > 0:
         bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
