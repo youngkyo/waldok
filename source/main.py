@@ -128,9 +128,9 @@ def check_is_fit(df):
         if start_price_list[1] > end_price_list[1] \
                 and start_price_list[2] > end_price_list[2] \
                 and start_price_list[3] < end_price_list[3] \
+                and start_price_list[3] < end_price_list[1] \
+                and start_price_list[3] < end_price_list[2] \
                 and before_3day_volume >= 1000000:
-                # and end_price_list[3] > start_price_list[1] \
-                # and end_price_list[3] > start_price_list[2] \
             return True
 
         # four
@@ -138,10 +138,10 @@ def check_is_fit(df):
                 and start_price_list[2] > end_price_list[2] \
                 and start_price_list[3] > end_price_list[3] \
                 and start_price_list[4] < end_price_list[4] \
+                and start_price_list[4] > end_price_list[1] \
+                and start_price_list[4] > end_price_list[2] \
+                and start_price_list[4] > end_price_list[3] \
                 and before_4day_volume >= 1000000:
-                # and end_price_list[4] > start_price_list[1] \
-                # and end_price_list[4] > start_price_list[2] \
-                # and end_price_list[4] > start_price_list[3] \
             return True
 
     except IndexError:
@@ -210,13 +210,13 @@ def get_head_subject(stock_df):
         if len(stock_list) > 9:
             # print(len(stock_list))
             values = '\n\n'.join(stock_list)
-            # print(values)
-            bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+            # bot.send_message(chat_id='@waldok', text=values, timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+            print(values)
             stock_list = []
 
     if len(stock_list) > 0:
-        bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
-        # print(stock_list)
+        # bot.send_message(chat_id='@waldok', text='\n\n'.join(stock_list), timeout=10, parse_mode=telegram.ParseMode.MARKDOWN)
+        print(stock_list)
 
     return stock_list
 
